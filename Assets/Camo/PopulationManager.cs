@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -50,8 +51,33 @@ public class PopulationManager : MonoBehaviour
         }
     }
 
+    GameObject Breed(GameObject parent1, GameObject parent2)
+    {
+        Vector3 pos = new Vector3(Random.Range(-9, 9), Random.Range(-4.5f, 4.5f), 0);
+        GameObject offspring = Instantiate(personPrefabe, pos, Quaternion.identity);
+        DNA dna1 = parent1.GetComponent<DNA>();
+        DNA dna2 = parent2.GetComponent<DNA>();
+
+        //swap parent dna
+        offspring.GetComponent<DNA>().r = Random.Range(0f, 10f) < 5 ? dna1.r : dna2.r;
+        offspring.GetComponent<DNA>().g = Random.Range(0f, 10f) < 5 ? dna1.g : dna2.g;
+        offspring.GetComponent<DNA>().b = Random.Range(0f, 10f) < 5 ? dna1.b : dna2.b;
+        return offspring;
+    }
     private void BreeadNewPopulation()
     {
-        throw new System.NotImplementedException();
+        List<GameObject> newPopulation = new List<GameObject>();
+        List<GameObject> sortedList = population.OrderBy(o => o.GetComponent<DNA>().timeToDie).ToList();
+        population.Clear();
+        for(int i = (int)(sortedList.Count / 2.0f) - 1; i < sortedList.Count - 1; i++)
+        {
+            population.Add(Breed(sortedList[i], sortedList[i + 1]));
+            population.Add(Breed(sortedList[i + 1], sortedList[i]));
+        }
+        for(int i = 0; i < sortedList.Count; i++)
+        {
+            Destroy(sortedList[i]);
+        }
+        generation++;
     }
 }
